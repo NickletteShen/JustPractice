@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script>
+    (function (w) {
+        /**
+         * jsonp的实现
+         * @param {Object}option
+         */
+          function jsonp(option) {
+              // 0. 产生不同的函数名
+              var callBackName = 'itLike' + Math.random().toString().substr(2) +  Math.random().toString().substr(2);
+              // console.log(callBackName);
+              // 1. 函数挂载在全局
+              w[callBackName] = function (data) {
+                  option.success(data);
+                  // 删除script标签
+                  document.body.removeChild(scriptEle);
+              };
+              // 2. 处理url链接
+              option.url = option.url + '?callback=' + callBackName;
+              // 3. 创建script标签插入body
+              var scriptEle = document.createElement('script');
+              scriptEle.src = option.url;
+              document.body.appendChild(scriptEle);
+          }
+          w.jsonp = jsonp;
+    })(window);
+</script>
+<script>
+	// 调用
+    jsonp({
+        url: 'http://localhost:3000/',
+        success: function (data) {
+            console.log(data);
+            alert('111');
+        }
+    });
+
+    jsonp({
+        url: 'http://localhost:3000/',
+        success: function (data) {
+            console.log(data);
+            alert('222');
+        }
+    });
+
+    jsonp({
+        url: 'http://localhost:3000/',
+        success: function (data) {
+            console.log(data);
+            alert('333');
+        }
+    });
+</script>
+</body>
+</html>

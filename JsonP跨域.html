@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+        // 1、客户端准备一个全局的接收函数
+        window.handleCallback = (res)=>{
+            console.log(res)
+        }
+    </script>
+    <!-- 2、创建script标签 发出请求 -->
+    <script src="xxx?callback=handleCallback">
+        // script标签的请求必须在写在定义全局函数之后
+        // 接收函数要作为参数传给后端
+    </script> 
+
+    <!-- 3、服务端收到请求 -->
+    <!-- 返回数据:  
+        handleCallback({
+            a: '1',
+            b: '2'
+        })
+    -->
+    <!-- 注意返回一个函数的调用，参数是数据 -->
+
+    <!-- 4、客户端收到服务端的响应, 相当于代码变成了 -->
+    <script>
+        handleCallback({
+            a: '1',
+            b: '2'
+        })
+    </script>
+
+    <!-- 5、用一个函数动态的生成标签 -->
+    <script>
+        let scriptEle = document.createElement('script')
+        scriptEle.src='XXX?callback=handlecallBack'
+        document.body.appendChild(scriptEle)
+    </script>
+</body>
+</html>
