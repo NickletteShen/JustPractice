@@ -1,0 +1,89 @@
+<!-- http://localhost:3000/a.html向http://localhost:4000/b.html传递消息 -->
+
+<!-- postMessage -->
+<!-- a.html里嵌入iframe -->
+<iframe src='http://localhost:4000/b.html' frameborder='0' id='frame' onload='handleLoad()'>
+</iframe>
+<!-- onload加载完后发送消息 -->
+<script>
+    const handleLoad = ()=>{
+        let frame = document.getElementById('frame')
+        // postMessage挂载在window对象上，用.contentWindow获取到iframe的window对象
+        frame.contentWindow.postMessage('你好','http://localhost:4000')
+        window.onmessage = function(e){ // 接受返回的数据
+            console.log(e.data) // hello
+        }
+    }
+</script>
+
+<!-- b.html -->
+<script>
+    // 监听message事件,并设置回调函数,event对象的data属性存放着传过来的数据
+    window.onmessage = function(e){
+        console.log(e.data) // 你好
+        e.source.postMessage('hello',e.origin)
+    }
+</script>
+
+<!-- ------------------- -->
+<!-- window.name, 需要一个和a.html同域的c.html作为中间代理 -->
+<iframe src='http://localhost:4000/b.html' frameborder='0' id='frame' onload='handleLoad()'>
+<!-- 嵌在3000 a.html -->
+</iframe>
+<!-- 加载完的回调 -->
+<script>
+    let first = true
+    // onload事件触发两次，第1次加载跨域页，并留存数据在window.name
+    // 第1次onload跨域页成功后，切换到同域代理页面
+    // 第2次onload到c.html后，读取widow.name的值
+    const handleLoad = ()=>{
+        if(first){
+            let frame = document.getElementById('frame')
+            frame.src = 'http://localhost:3000/c.html'
+            first = false
+        }else{
+            console.log(frame.contentWindow.name) // 成功拿到
+        }
+    }
+</script>
+<!-- b.html -->
+<script>window.name = 'data' </script>
+
+<!-- ------------------- -->
+<!-- hash+iframe -->
+<!-- a.html -->
+<iframe src='http://localhost:4000/b.html#我要数据'></iframe>
+<script> // a监测自己的hash值变化
+    window.onhashchange = function(){
+        console.log(location.hash)
+    }
+</script>
+<!-- b.html -->
+<script>
+    // 拿到自己的hash
+    let frame = document.createElement('iframe')
+    iframe.src = 'http://localhost:3000/c.html#返回的数据'
+    document.body.appendChild(frame)
+</script>
+<!-- c.html -->
+<script>
+    // c通过.parent.parent访问a（同域） 将结果放到a的hash
+    window.parent.parent.location.hash = location.hash
+</script>
+
+<!-- -------------------- -->
+<!-- document.domain 二级域名相同的情况 -->
+<!-- 如a.test.com/a.html和b.test.com/b.html -->
+<!-- a.html -->
+<iframe src='http://b.test.com/b.html' onload='handleLoad()' id='frame'></iframe>
+<script>
+    document.doman = 'test.com'
+    function handleLoad(){
+        console.log(frame.contentWindow.a)
+    }
+</script>
+<!-- b.html -->
+<script>
+    document.domain = 'test.com'
+    let a = 100
+</script>
